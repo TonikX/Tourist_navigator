@@ -13,4 +13,4 @@ docker-compose up
 
 docker ps - посмотреть номер контейрена tourist_web
 
-docker exec -it номер_контейнера bash
+docker exec -it номер_контейнера bash - запуск командной строки внутри контейнера
