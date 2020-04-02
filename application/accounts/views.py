@@ -1,8 +1,8 @@
 from rest_framework.generics import (ListCreateAPIView,RetrieveUpdateDestroyAPIView,)
 from rest_framework.permissions import IsAuthenticated
-from kit.models import User
-from AirsoftKit.permissions import IsOwnerProfileOrReadOnly
-from kit.serializers import userProfileSerializer
+from Tourist_app.models import User
+from Tourist_project.permissions import IsOwnerProfileOrReadOnly
+from Tourist_app.serializers import userProfileSerializer
 
 # Create your views here.
 

@@ -6,6 +6,6 @@ __pycache__/
 *.py[cod]
 .pyc
 .env
-kit_frontend_vue/
+Tourist_app_frontend_vue/
 node_modules/
 templates/

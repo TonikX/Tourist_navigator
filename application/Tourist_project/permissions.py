@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from kit.models import User
+from Tourist_app.models import User
 
 
 class IsStudent(permissions.BasePermission):
