@@ -29,10 +29,12 @@ class ObjType(models.Model):
 
 
 class MapObject(models.Model):
-    keywords = models.TextField()
-    coordinates = models.TextField()
+    name=models.TextField()
+    image_link=models.TextField(blank=True, null=True)
+    geo_coordinates = models.TextField()
     description = models.TextField()
-    object_type = models.ManyToManyField(ObjType)
+    object_type = models.ManyToManyField(ObjType, blank=True, null=True)
+    full_address = models.TextField(blank=True, null=True)
     REQUIRED_FIELDS = ['keywords', 'coordinates', 'object_type']
 
     def __str__(self):
