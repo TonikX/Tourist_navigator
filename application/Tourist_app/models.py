@@ -11,10 +11,10 @@ class TouristClass(models.Model):
 
 
 class User(AbstractUser):
-    role = models.CharField("Роль", max_length=15, default='student')
-    tel = models.CharField("Телефон", max_length=15, blank=True)
+    role = models.CharField("Роль", max_length=15, default='tourist')
+    date_birth=models.DateTimeField(blank=True, null=True)
     user_class = models.ManyToManyField(TouristClass)
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'role', 'tel']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'role']
 
     def __str__(self):
         return self.username
@@ -38,7 +38,7 @@ class MapObject(models.Model):
     REQUIRED_FIELDS = ['keywords', 'coordinates', 'object_type']
 
     def __str__(self):
-        return self.description
+        return self.name
 
 
 class AuthorRoute(models.Model):

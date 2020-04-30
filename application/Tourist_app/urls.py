@@ -5,7 +5,11 @@ app_name = "Tourist_app"
 # app_name will help us do a reverse look-up latter.
 urlpatterns = [
 path('users/', UserView.as_view()),
-path('routes/', RouteView.as_view()),
-path('classes/', UserClasses.as_view())
+path('routes/<int:pk>', RouteView.as_view()),
+path('points/', RoutePointView.as_view()),
+path('points/<int:pk>', RoutePointView.as_view()),
+path('user_routes/<int:pk>', UserRoutesView.as_view()),
+path('classes/', UserClasses.as_view()),
+path('objects/<slug:name>', MapObjectView.as_view())
 
 ]
