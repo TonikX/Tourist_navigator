@@ -32,3 +32,4 @@ pymysql==0.9.3
 pillow==7.0.0
 PyMySQL[rsa]
 cryptography
+drf-yasg==1.17.1

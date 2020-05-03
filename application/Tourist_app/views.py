@@ -1,6 +1,6 @@
-from django.db.models import Max
-from rest_framework import permissions
-from rest_framework.generics import RetrieveAPIView
+from django.http import Http404
+from rest_framework import permissions, generics
+from rest_framework.generics import RetrieveAPIView, ListCreateAPIView, ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import User
@@ -15,85 +15,70 @@ class UserView(APIView):
         serializer = userProfileSerializer(users, many=True)
         return Response({"users:": serializer.data})
 
-class MapObjectView(APIView):
-    def get(self, request, name):
-        print(name)
-        name=name.split('_')
-        map_objects=MapObject.objects.filter(object_type__in=name)
-        serializer = MapObjectSerializer(map_objects, many=True)
-        return Response({"objects:": serializer.data})
+class MapObjectView(ListAPIView):
+    '''
+        Получение  информации об объектах (можно получить объекты содержащие определнные типы если через "_" вводить их id)
+    '''
+    serializer_class = MapObjectSerializer
+    def get_queryset(self):
+        if('pk' in dict(self.kwargs)):
+            if ('_' in str(self.kwargs['pk'])):
+                name = self.kwargs['pk'].split('_')
+                return MapObject.objects.filter(object_type__in=name)
+            elif (str(self.kwargs['pk']).isnumeric()):
+                return MapObject.objects.filter(object_type=self.kwargs['pk'])
+            else:
+                raise Http404
+        else:
+            return MapObject.objects.all()
 
 
-class RouteView(APIView):
+
+
+class RouteView(ListAPIView):
     '''
     Получение  информации о всех точках в пути по айди (в порядке нумерации точек)
     '''
+    serializer_class = RouteCompositionSerializer
+    def get_queryset(self):
+        return RouteComposition.objects.filter(route_id=self.kwargs['pk']).order_by('obj_position')
+
+class UserRoutesView(ListCreateAPIView):
+    '''
+    Получение  информации о всех созданных маршрутах и добавление последних
+    '''
+    serializer_class = IndividualRouteSerializer
+
+    def get_queryset(self):
+        return IndividualRoute.objects.all()
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+
+
+
+class UserClasses(generics.ListCreateAPIView):
+    '''
+       Получение и добавление типов (тестовая вьюха)
+    '''
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, pk):
-        # id_route = request.GET.get()
-        route_comp = RouteComposition.objects.filter(route_id=pk).order_by('obj_position')
-        serializer = RouteCompositionSerializer(route_comp, many=True)
-        return Response({"routes:": serializer.data})
-
-
-class UserRoutesView(APIView):
-    '''
-    Получение  информации о всех маршрутах пользователя
-    '''
-    permission_classes = [permissions.AllowAny]
-    def get(self, request, pk):
-        routes=IndividualRoute.objects.filter(route_user=pk)
-        serializer=IndividualRouteSerializer(routes, many=True)
-        return Response({"routes:": serializer.data})
-    '''
-     Добавление маршрута (не точек) передается по адресу айди пользователя (присваивать айди в запросе не надо т.е.)
-    '''
-    def post(self, request, pk):
-        request.data['route_user']=pk
-        serializer = IndividualRouteSerializer(data=request.data)
+    serializer_class = TouristClassSerializer
+    def get_queryset(self):
+        return TouristClass.objects.all()
+    def perform_create(self, serializer):
         if serializer.is_valid():
-            class_saved = serializer.save()
-            return Response({"success": "New Route  created successfully"})
+            serializer.save()
 
-
-class UserClasses(APIView):
-    permission_classes = [permissions.AllowAny]
+class RoutePointView (generics.ListCreateAPIView):
     '''
-      Тестовая вещь
+    Добавление и просмотр отдельных точек
     '''
-    def get(self, request):
-        classes = TouristClass.objects.all()
-        serializer = TouristClassSerializer(classes, many=True)
-        return Response({"users_classes:": serializer.data})
-
-    def post(self, request):
-        serializer = TouristClassSerializer(data=request.data)
+    serializer_class = RouteCompositionSerializer
+    def get_queryset(self):
+        return RouteComposition.objects.all().order_by('route_id_id')
+    def perform_create(self, serializer):
         if serializer.is_valid():
-            class_saved = serializer.save()
-            return Response({"success": "New Class '{}' created successfully".format(class_saved.class_name)})
-
-class RoutePointView (APIView):
-    def get(self, request):
-        route_point = RouteComposition.objects.all()
-        serializer = RouteCompositionSerializer(route_point, many=True)
-        return Response({"route points:": serializer.data})
-    def post(self,request):
-        '''
-        Добавление точки в пути;
-        Позицию точки можно не указывать она добавляется автоматически;
-        '''
-        object_postion_max = RouteComposition.objects.filter(route_id=request.data['route_id']).aggregate(Max('obj_position'))
-        request.data['obj_position']=int(object_postion_max['obj_position__max'])+1
-        serializer = RouteCompositionSerializer(data=request.data)
-        if serializer.is_valid():
-            point_saved = serializer.save()
-            return Response({"success": "New point created successfully"})
-    def put(self, request, pk):
-        route_point=RouteComposition.objects.get(pk=pk)
-        serializer=RouteCompositionSerializer(route_point, request.data, partial=True)
-        if serializer.is_valid():
-            point_saved = serializer.save()
-            return Response({"success": "Point updated successfully"})
-
+            serializer.save()
 
