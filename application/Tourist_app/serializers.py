@@ -14,12 +14,14 @@ class TouristClassSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class userProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с акканутами"""
-    user_class = TouristClassSerializer(many=True, read_only=True)
     class Meta:
         model = User
         fields = '__all__'
+    def to_representation(self, value):
+        self.fields['user_class']=TouristClassSerializer(many=True, read_only=True)
+        return super().to_representation(value)
 
 
 class ObjectTypeSerializer(serializers.ModelSerializer):
@@ -41,13 +43,17 @@ class RouteCompositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteComposition
         fields = '__all__'
-
     def create(self, validated_data):
         object_postion_max = RouteComposition.objects.filter(route_id=validated_data['route_id']).aggregate(Max('obj_position'))
-        validated_data['obj_position']=int(object_postion_max['obj_position__max'])+1
-        route_point = RouteComposition.objects.create(**validated_data)
-        route_point.save()
-        return route_point
+        if(object_postion_max['obj_position__max'])!=None:
+            validated_data['obj_position']=int(object_postion_max['obj_position__max'])+1
+            route_point = RouteComposition.objects.create(**validated_data)
+            route_point.save()
+            return route_point
+        else:
+            route_point = RouteComposition.objects.create(**validated_data)
+            route_point.save()
+            return route_point
     def to_representation(self, value):
         self.fields['map_id']=MapObjectSerializer(many=False, read_only=True)
         return super().to_representation(value)

@@ -33,3 +33,4 @@ pillow==7.0.0
 PyMySQL[rsa]
 cryptography
 drf-yasg==1.17.1
+tsp_solver2==0.3
