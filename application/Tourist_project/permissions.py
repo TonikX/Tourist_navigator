@@ -3,17 +3,21 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 from Tourist_app.models import User
 
 
-class IsStudent(permissions.BasePermission):
+class IsUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if(request.user.role == 'student'):
             return True
 
 
-class IsTeacher(permissions.BasePermission):
+class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if(request.user.role == 'teacher'):
             return True
 
+class IsAuthor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if(request.user.role == 'author'):
+            return True
 
 class IsOwnerProfileOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
